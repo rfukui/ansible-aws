@@ -1,0 +1,117 @@
+---
+# tasks file for myapp_infra
+
+- name: launch load balancer
+  ec2_elb_lb:
+    name: "{{ app_name }}"
+    region: "{{ region }}"
+    state: present
+    subnets: "{{ subnets }}"
+    security_group_ids: "{{ app_security_group.group_id }}"
+    connection_draining_timeout: 60
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+    health_check:
+        ping_protocol: http # options are http, https, ssl, tcp
+        ping_port: 80
+        ping_path: "/" # not required for tcp or ssl
+        response_timeout: 5 # seconds
+        interval: 30 # seconds
+        unhealthy_threshold: 5
+        healthy_threshold: 5
+  tags: load_balancer
+
+- name: create launch config
+  ec2_lc:
+    name: "{{ app_name }}"
+    image_id: "{{ ami }}"
+    key_name: "{{ key_name }}"
+    region: "{{ region }}"
+    #security_groups: "{{ app_security_group.group_id }},{{ tower_callback_client_group_id }},{{ tower_client_group_id }}"
+    security_groups: "{{ app_security_group.group_id }}"
+    instance_type: "{{ instance_size }}"
+    user_data: "{{ user_data }}"
+  tags: launch_config
+
+- name: create autoscale groups
+  ec2_asg:
+    name: "{{ app_name }}"
+    load_balancers: "{{ app_name }}"
+    launch_config_name: "{{ app_name }}"
+    min_size: "{{ min_size }}"
+    max_size: "{{ max_size }}"
+    desired_capacity: "{{ desired_capacity | default(1) }}"
+    region: "{{ region }}"
+    vpc_zone_identifier: "{{ subnets | join(',') }}"
+    health_check_type: EC2
+    health_check_period: 300
+
+
+- name: create scale down  policy
+  ec2_scaling_policy:
+    state: present
+    region: "{{ region }}"
+    name: scale-down-policy
+    adjustment_type: ChangeInCapacity
+    asg_name: "{{ app_name }}"
+    scaling_adjustment: -1
+    min_adjustment_step: -1
+    cooldown: 300
+  register: scale_down_policy
+  tags: scaling_policy
+
+- name: create scale up policy
+  ec2_scaling_policy:
+    state: present
+    region: "{{ region }}"
+    name: scale-up-policy
+    adjustment_type: ChangeInCapacity
+    asg_name: "{{ app_name }}"
+    scaling_adjustment: 1
+    min_adjustment_step: 1
+    cooldown: 300
+  register: scale_up_policy
+  tags: scaling_policy
+
+- name: create scale down alarm
+  ec2_metric_alarm:
+    state: present
+    region: "{{ region }}"
+    name: "cpu-low"
+    metric: CPUUtilization
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: "<="
+    threshold: 5.0
+    period: 300
+    evaluation_periods: 3
+    unit: "Percent"
+    description: "This will alarm when cpu usage average is lower than 5% for 15 minutes "
+    dimensions: 
+      AutoScalingGroupName: "{{ app_name }}"
+    alarm_actions: 
+    - "{{ scale_down_policy.arn }}"
+  tags: alarm
+
+- name: create scale up alarm
+  ec2_metric_alarm:
+    state: present
+    region: "{{ region }}"
+    name: "cpu-high"
+    metric: CPUUtilization
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: "<="
+    threshold: 90.0
+    period: 300
+    evaluation_periods: 3
+    unit: "Percent"
+    description: "This will alarm when cpu usage average is higher than 90% for 15 minutes "
+    dimensions: 
+      AutoScalingGroupName: "{{ app_name }}"
+    alarm_actions: 
+      - "{{ scale_up_policy.arn }}"
+  tags: alarm
+

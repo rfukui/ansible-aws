@@ -1,0 +1,13 @@
+---
+# vars file for myapp_infra
+user_data: ""
+host_config_key: ""
+template_id: ""
+tower_callback_client_group_id: ""
+tower_client_group_id: ""
+ami: "ami-4e79ed36" #<--imagem de ubuntu 16.04 limpa
+instance_size: "t2.micro"
+min_size: "1"
+max_size: "1"
+
+

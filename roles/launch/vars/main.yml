@@ -1,0 +1,33 @@
+region: us-west-2
+zone: us-west-2b
+keypair: fukui
+instance_type: t2.micro
+service_name: "{{ app_name }}"
+volumes:
+  - device_name: /dev/sda1
+    device_type: gp2
+    volume_size: 20
+    delete_on_termination: true
+domain: domain
+
+sec_group_rules: 
+- proto: tcp
+  from_port: 80
+  to_port: 80
+  cidr_ip: 0.0.0.0/0
+- proto: tcp
+  from_port: 22
+  to_port: 22
+  cidr_ip: 0.0.0.0/0
+- proto: tcp
+  from_port: 0
+  to_port: 65535
+  group_name: "{{ app_name }}"
+- proto: udp
+  from_port: 0
+  to_port: 65535
+  group_name: "{{ app_name }}"
+- proto: icmp
+  from_port: 0
+  to_port: 0
+  group_name: "{{ app_name }}"
