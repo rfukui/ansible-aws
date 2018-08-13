@@ -1,0 +1,4 @@
+packs:
+  - nginx
+  - php5-fpm
+  - git

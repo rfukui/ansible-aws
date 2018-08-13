@@ -1,0 +1,9 @@
+---
+- name: Configure instance(s)
+  hosts: ec2hosts
+  become: true
+  apt:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes
+  loop: "{{ packs }}"

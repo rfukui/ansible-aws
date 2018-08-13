@@ -16,7 +16,9 @@ Consegui fazer receitas para instalação de todos os pacotes, mas esbarrei em a
 
 Eu tinha entendido errado na primeira vez que fiz o teste e quando estava terminando eu vi que precisava ser escalavel.
 Consegui fazer toda a configuração de variaveis de sistema baseado em receitas que eu encontrei, meu maior problema foi conseguir fazer a imagem que eu alterava se tornar a imagem default para o sistema (baseado em uma imagem limpa do ubuntu)
+
 Este teste nao está a contento, estou no caminho de entender melhor como ele funciona, se eu puder enviar até domingo uma nova versão deve funcionar.
+
 
 como pode notar eu parei exatamente no momento de criar a parte "mais fácil" que era justamente o servidor e fazer o teste de conexão.
 

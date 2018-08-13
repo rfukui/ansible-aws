@@ -2,4 +2,11 @@
   gather_facts: no
   roles:
   - launch
+- hosts: ec2hosts
+  roles:
+  - install
+
+- hosts: localhost
+  gather_facts: no
+  roles:
   - infra

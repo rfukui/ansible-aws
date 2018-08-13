@@ -33,7 +33,7 @@
     image: "{{ ami_result.results[0].ami_id }}"
     instance_type: "{{ instance_type }}"
     instance_tags:
-      Name: "webapp-{{ service_name }}"
+      Name: "{{ service_name }}"
     volumes: "{{ volumes }}"
     wait: yes
   register: ec2
@@ -41,8 +41,12 @@
 - name: adcionando instancias aos grupos de seguranca
   add_host:
     groups: "{{ app_security_group.group_name }}"
+    groupname: ec2hosts
     name: "{{ item.public_dns_name }}"
+    ansible_host: "{{ item.public_dns_name }}"
+    hostname: ec2hosts
   loop: "{{ ec2.instances }}"
+
 
 - name: Wait for instance to boot
   wait_for:
@@ -53,11 +57,3 @@
     state: started
   loop: "{{ ec2.instances }}"
 
-
-#- name: Configure instance(s)
-#  hosts: 
-#  gather_facts: True
-#  ...
-#  tasks:
-#   - name: install  git
-#     apt: name=git state=present
