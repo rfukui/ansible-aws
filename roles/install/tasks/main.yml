@@ -1,6 +1,6 @@
 ---
+
 - name: configura ec2
-  hosts: ec2hosts
   become: true
   apt:
       name: "{{ item }}"
@@ -12,5 +12,24 @@
   become: true
   git:
     repo: https://github.com/WordPress/WordPress.git
-    dest: /var/www
+    dest: "{{ php_site_root }}"
 
+- name: configura nginx
+  become: true
+  template: "src=nginx.conf dest=/etc/nginx/sites-enabled/{{ php_base_name }}.conf"
+  notify: nginx restart
+
+- name: configura wp
+  become: true
+  template:
+    src: wp_config.php
+    dest: "{{ php_site_root }}/wp_config.php"
+  notify:
+    - fpm restart
+- name: Generate PHP-FPM pool configuration
+  become: true
+  template:
+    src: fpm-pool.conf
+    dest: "{{ php_fpm_pool_conf_path }}/{{ php_pool_name }}.conf"
+  notify:
+    - fpm restart

@@ -1,4 +1,60 @@
 packs:
   - nginx
+  - php5-mysql
   - php5-fpm
   - git
+
+
+php_required_system_packages:
+  - php5-fpm
+
+php_fpm_pool_conf_path: /etc/php5/fpm/pool.d
+php_fpm_socket_path: /var/run/php5-fpm.sock
+php_fpm_service_name: php5-fpm
+php_fastcgi_nginx_include: include fastcgi_params;
+php_uninstall: no
+php_uninstall_snippets: no
+php_base_name: my_php_project
+php_user: "www-data"
+php_domain_name: "{{ php_base_name }}.local"
+php_url: "http://{{ php_domain_name }}"
+php_site_root: "/var/www"
+php_index_filename: "index.php"
+php_disallow_robots: no
+php_ssl_only: no
+
+
+nginx_support_http2: no
+php_redirections: []
+include_default_location_block: yes
+php_create_pool: no
+php_pool_name: "{{ php_base_name }}"
+php_pool_group: www-data
+php_pool_socket_path: "/var/run/php5-fpm.sock"
+
+
+php_fastcgi_param: []
+
+php_http_basic_auth_enabled: false
+php_http_basic_auth_message: 'Authorization required'
+php_http_basic_auth_htpasswd_path: ''
+php_http_basic_auth_accounts: []
+
+
+
+### wp conf
+
+database_name: ""
+db_user: ""
+db_user_password: ""
+db_host: ""
+
+
+AUTH_KEY: ""
+SECURE_AUTH_KEY: ""
+LOGGED_IN_KEY: ""
+NONCE_KEY: ""
+AUTH_SALT: ""
+SECURE_AUTH_SALT: ""
+LOGGED_IN_SALT: ""
+NONCE_SALT: ""

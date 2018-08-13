@@ -1,26 +1,48 @@
 ---
 # tasks file for myapp_infra
 
-- name: Stop the sandbox instances
+- name: para instancias
   ec2:
     instance_ids: "{{ ec2.instances[0].id }}"
     region: '{{ region }}'
     state: stopped
     wait: true
-    vpc_subnet_id: subnet-29e63245
+    vpc_subnet_id: "{{ subnets }}"
     assign_public_ip: yes
+
+- ec2_ami_find:
+    region: "{{ region }}"
+    ami_tags: {"Name": "{{app_name}}"}
+    sort: name
+    sort_end: -10
+  register: old_ami_result
+
+- ec2_ami:
+    region: "{{ region }}"
+    image_id: "{{ item.ami_id }}"
+    delete_snapshot: yes
+    state: absent
+  loop: "{{ old_ami_result.results }}"
+  ignore_errors: yes
 
 - name: cria imagem
   ec2_ami:
     instance_id: "{{ ec2.instances[0].id }}"
     wait: true
-    name: newtest
+    name: "{{ app_name }}-{{ ec2.instances[0].id }}"
     region: "{{ region }}"
     tags:
-      Name: newtest
+      Name: "{{ app_name }}"
       Service: TestService
   register: image
 
+
+- name: mata instancias
+  ec2:
+    state: 'absent'
+    instance_ids: '{{ ec2.instances[0].id }}'
+    region: "{{ region }}"
+    
 
 - name: launch load balancer
   ec2_elb_lb:
@@ -53,7 +75,6 @@
     #security_groups: "{{ app_security_group.group_id }},{{ tower_callback_client_group_id }},{{ tower_client_group_id }}"
     security_groups: "{{ app_security_group.group_id }}"
     instance_type: "{{ instance_size }}"
-    user_data: "{{ user_data }}"
   tags: launch_config
 
 - name: create autoscale groups
