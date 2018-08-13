@@ -1,6 +1,27 @@
 ---
 # tasks file for myapp_infra
 
+- name: Stop the sandbox instances
+  ec2:
+    instance_ids: "{{ ec2.instances[0].id }}"
+    region: '{{ region }}'
+    state: stopped
+    wait: true
+    vpc_subnet_id: subnet-29e63245
+    assign_public_ip: yes
+
+- name: cria imagem
+  ec2_ami:
+    instance_id: "{{ ec2.instances[0].id }}"
+    wait: true
+    name: newtest
+    region: "{{ region }}"
+    tags:
+      Name: newtest
+      Service: TestService
+  register: image
+
+
 - name: launch load balancer
   ec2_elb_lb:
     name: "{{ app_name }}"

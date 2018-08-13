@@ -14,12 +14,3 @@
     repo: https://github.com/WordPress/WordPress.git
     dest: /var/www
 
-- name: cria imagem
-  ec2_ami:
-    instance_id: ec2.instances[0].instance_id
-    wait: yes
-    name: newtest
-    tags:
-      Name: newtest
-      Service: TestService
-  register: image

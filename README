@@ -1,6 +1,8 @@
 dependencias
 python2
 boto
+boto3
+botocore
 ansible
 
 configurar as seguintes variaveis de ambiente
@@ -11,16 +13,9 @@ export AWS_SECRET_ACCESS_KEY="chave_secreta"
 
 ansible-playbook provision.yml
 
-Foi meu primeiro contato com ansible.
-Consegui fazer receitas para instalação de todos os pacotes, mas esbarrei em alguns problemas que eu deveria conseguir resolver com mais tempo.
+executar 
+ansible-playbook provision.yml
 
-Eu tinha entendido errado na primeira vez que fiz o teste e quando estava terminando eu vi que precisava ser escalavel.
-Consegui fazer toda a configuração de variaveis de sistema baseado em receitas que eu encontrei, meu maior problema foi conseguir fazer a imagem que eu alterava se tornar a imagem default para o sistema (baseado em uma imagem limpa do ubuntu)
-
-Este teste nao está a contento, estou no caminho de entender melhor como ele funciona, se eu puder enviar até domingo uma nova versão deve funcionar.
-
-
-como pode notar eu parei exatamente no momento de criar a parte "mais fácil" que era justamente o servidor e fazer o teste de conexão.
-
+neste momento falta apenas os arquivos de configuracao do nginx e do php-fpm
 
 As variaveis são auto-explicativas.
