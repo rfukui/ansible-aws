@@ -1,12 +1,10 @@
-region: us-west-2
-zone: us-west-2b
 keypair: fukui
 ami: "ami-4218403a" #<--imagem de ubuntu 16.04 limpa
 instance_type: t2.micro
 service_name: "{{ app_name }}"
 volumes:
   - device_name: /dev/sda1
-    device_type: gp2
+    volume_type: gp2
     volume_size: 20
     delete_on_termination: true
 domain: domain

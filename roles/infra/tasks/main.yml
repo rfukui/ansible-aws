@@ -10,14 +10,14 @@
     vpc_subnet_id: "{{ subnets }}"
     assign_public_ip: yes
 
-- ec2_ami_find:
+- ec2_ami_facts:
+    filters:
+      "tag:Name": "{{app_name}}"
     region: "{{ region }}"
-    ami_tags: {"Name": "{{app_name}}"}
-    sort: name
-    sort_end: -10
   register: old_ami_result
 
-- ec2_ami:
+- name: destroi as imagens antigas 
+  ec2_ami:
     region: "{{ region }}"
     image_id: "{{ item.ami_id }}"
     delete_snapshot: yes
@@ -44,7 +44,7 @@
     region: "{{ region }}"
     
 
-- name: launch load balancer
+- name: inicia balancer
   ec2_elb_lb:
     name: "{{ app_name }}"
     region: "{{ region }}"
@@ -66,13 +66,12 @@
         healthy_threshold: 5
   tags: load_balancer
 
-- name: create launch config
+- name: configuracao de maquinas para o autoscale
   ec2_lc:
     name: "{{ app_name }}"
     image_id: "{{ image.image_id }}"
-    key_name: "{{ key_name }}"
+    key_name: "{{ keypair }}"
     region: "{{ region }}"
-    #security_groups: "{{ app_security_group.group_id }},{{ tower_callback_client_group_id }},{{ tower_client_group_id }}"
     security_groups: "{{ app_security_group.group_id }}"
     instance_type: "{{ instance_size }}"
   tags: launch_config

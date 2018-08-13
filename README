@@ -11,11 +11,131 @@ export AWS_ACCESS_KEY_ID="id_Da_chave"
 export AWS_SECRET_ACCESS_KEY="chave_secreta"
 
 
-ansible-playbook provision.yml
-
 executar 
 ansible-playbook provision.yml
 
-neste momento falta apenas os arquivos de configuracao do nginx e do php-fpm
+Configuracao de variaveis.
 
-As variaveis são auto-explicativas.
+group_vars/all.yml
+
+app_name: "webapp-wpress" #nome que a aplicacao vai receber
+vpc_id: "vpc-439ecd3a" #identificação de uma vpc pre-existentede dentro da aws na regiao escolhida
+region: "us-west-2" #rregiao da aws
+zone: "us-west-2b" #zona dentro da regiao escolhida
+subnets: ["subnet-d158e6a8"] #subredes
+keypair: "fukui" #chave ssh da aws
+
+
+roles/launch/vars/main.yml
+
+ami: "ami-4218403a" #<--imagem de ubuntu 14.04 limpa
+instance_type: t2.micro #tipo de maquina que subira para a criacao da vm base
+service_name: "{{ app_name }}" #nome do servico
+volumes:
+  - device_name: /dev/sda1
+    volume_type: gp2
+    volume_size: 20
+    delete_on_termination: true
+domain: domain
+
+
+sec_group_rules: #regras de seguranca
+#porta 80 para http 
+- proto: tcp
+  from_port: 80
+  to_port: 80
+  cidr_ip: 0.0.0.0/0
+#porta 22 para ssh
+- proto: tcp
+  from_port: 22
+  to_port: 22
+  cidr_ip: 0.0.0.0/0
+#todas as portas para comunicacacao interna da rede
+- proto: tcp
+  from_port: 0
+  to_port: 65535
+- proto: udp
+  from_port: 0
+  to_port: 65535
+#resposta de ping
+- proto: icmp
+  from_port: 0
+  to_port: 0
+  group_name: "{{ app_name }}"
+
+
+roles/infras/vars/main.yml
+
+#packs instaladas
+packs:
+  - nginx
+  - php5-mysql
+  - php5-fpm
+  - git
+
+
+php_required_system_packages:
+  - php5-fpm
+
+#configuracao do phpfpm
+
+php_fpm_pool_conf_path: /etc/php5/fpm/pool.d
+php_fpm_socket_path: /var/run/php5-fpm.sock
+php_fpm_service_name: php5-fpm
+php_fastcgi_nginx_include: include fastcgi_params;
+php_uninstall: no
+php_uninstall_snippets: no
+php_base_name: my_php_project
+php_user: "www-data"
+php_domain_name: "{{ php_base_name }}.local"
+php_url: "http://{{ php_domain_name }}"
+php_site_root: "/var/www"
+php_index_filename: "index.php"
+php_disallow_robots: no
+php_ssl_only: no
+
+#configuracao nginx
+nginx_support_http2: no
+php_redirections: []
+include_default_location_block: yes
+php_create_pool: no
+php_pool_name: "{{ php_base_name }}"
+php_pool_group: www-data
+php_pool_socket_path: "/var/run/php5-fpm.sock"
+
+
+php_fastcgi_param: []
+
+php_http_basic_auth_enabled: false
+php_http_basic_auth_message: 'Authorization required'
+php_http_basic_auth_htpasswd_path: ''
+php_http_basic_auth_accounts: []
+
+
+#configuracao do wp
+### wp conf
+
+database_name: ""
+db_user: ""
+db_user_password: ""
+db_host: ""
+
+
+AUTH_KEY: ""
+SECURE_AUTH_KEY: ""
+LOGGED_IN_KEY: ""
+NONCE_KEY: ""
+AUTH_SALT: ""
+SECURE_AUTH_SALT: ""
+LOGGED_IN_SALT: ""
+NONCE_SALT: ""
+
+
+roles/infras/vars/main.yml
+---
+# vars file for myapp_infra
+instance_size: "t2.micro"
+min_size: "1" #quantidade minima de maquinas rodando
+max_size: "1" #quantiade maxima de maquinas rodando
+
+#
