@@ -1,5 +1,6 @@
 ---
-- name: Configure instance(s)
+- name: configura ec2
+  hosts: ec2hosts
   become: true
   apt:
       name: "{{ item }}"
@@ -9,6 +10,16 @@
 
 - name: install wp
   become: true
-  - git:
-      repo: git@github.com:WordPress/WordPress.git
-      dest: /var/www
+  git:
+    repo: https://github.com/WordPress/WordPress.git
+    dest: /var/www
+
+- name: cria imagem
+  ec2_ami:
+    instance_id: ec2.instances[0].instance_id
+    wait: yes
+    name: newtest
+    tags:
+      Name: newtest
+      Service: TestService
+  register: image

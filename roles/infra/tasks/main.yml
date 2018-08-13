@@ -26,7 +26,7 @@
 - name: create launch config
   ec2_lc:
     name: "{{ app_name }}"
-    image_id: "{{ ami }}"
+    image_id: "{{ image.image_id }}"
     key_name: "{{ key_name }}"
     region: "{{ region }}"
     #security_groups: "{{ app_security_group.group_id }},{{ tower_callback_client_group_id }},{{ tower_client_group_id }}"
