@@ -1,9 +1,14 @@
 ---
 - name: Configure instance(s)
-  hosts: ec2hosts
   become: true
   apt:
       name: "{{ item }}"
       state: latest
       update_cache: yes
   loop: "{{ packs }}"
+
+- name: install wp
+  become: true
+  - git:
+      repo: git@github.com:WordPress/WordPress.git
+      dest: /var/www
